@@ -1,1 +1,0 @@
-Project for running the Jersey League bot, api and future website.

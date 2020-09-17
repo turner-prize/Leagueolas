@@ -3,4 +3,4 @@ league-site/data/__pycache__/
 *.save
 .commands.py*.swp
 *.log
-
+config.py
