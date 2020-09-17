@@ -4,3 +4,5 @@ league-site/data/__pycache__/
 .commands.py*.swp
 *.log
 config.py
+btoken.py
+
