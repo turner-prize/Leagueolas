@@ -12,11 +12,14 @@ def JanCup():
     gw = GetJanCupWeek(session)
 
     if gw == 1 or gw == 2:
-        return JanCupQualification(session)
+        x = JanCupQualification(session)
+        session.close()
+        return x
     else:
-        x = JanCupScores(session,gw)
-        print(x)
-    session.close()
+        x =  JanCupScores(session,gw)
+        session.close()
+        return x
+    
 
 def UpdateFinal():
     session = CreateSession()
