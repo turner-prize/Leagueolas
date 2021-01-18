@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-#2nd test comment
-
 from telegram.ext import Updater,CommandHandler, MessageHandler, BaseFilter, Filters
 import time
 import commands
