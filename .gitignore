@@ -3,3 +3,4 @@ league.db
 logs/
 classictable.png
 table.png
+__pycache__/
