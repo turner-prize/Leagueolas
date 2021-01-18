@@ -5,7 +5,7 @@
 from sqlalchemy.sql import func
 from sqlalchemy import or_,desc
 from models import CreateSession, Gameweeks, Fixtures, Teams, Managers,Players,PlFixtures,DraftedPlayers, PlTeams, JanCupFixtures
-from commands import getScoreString, TripleCaptain
+import commands
 
 def JanCup():
     session = CreateSession()
@@ -114,8 +114,8 @@ def JanCupScores(session,jcgw):
         if manager1.id in fx:
             continue
         else:
-            ss1 = getScoreString(session,f.managerId,gw)
-            ss2 = getScoreString(session,f.opponentId,gw)
+            ss1 = commands.getScoreString(session,f.managerId,gw)
+            ss2 = commands.getScoreString(session,f.opponentId,gw)
             
             fx.append(f.managerId)
             fx.append(f.opponentId)
