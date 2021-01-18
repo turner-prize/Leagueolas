@@ -1,10 +1,11 @@
 from models import CreateSession,PlFixtures,Players
-from methods import updatePlFixtures, updateGameweekPlayers,updateFixturesWithTablePoints,produceTable,createTable,GetGameweek,updateLOTRWithTablePoints,produceLOTRTable,createLOTRTable
+from methods import updatePlFixtures, updateGameweekPlayers,updateFixturesWithTablePoints,produceTable,createTable,GetGameweek,createFPLClassicoTable,updatedPointshit
 import time
 from datetime import datetime, timedelta
 from dateutil import tz
 from collections import namedtuple
 from loguru import logger
+from config import cronLogPath
 
 def GetFixtures():
     session=CreateSession()
@@ -46,7 +47,7 @@ def LoopIt(rng):
     return rng
 
 def setupLogger():
-        logger.add('/home/turner_prize/leagueolas/bot/cronlog.log', format="{time:YYYY-MM-DD @ HH:mm:ss} | {message}",backtrace=True)
+        logger.add(cronLogPath, format="{time:YYYY-MM-DD @ HH:mm:ss} | {message}",backtrace=True)
 
 def getRangeNumber():
     x=GetFixtures()
@@ -85,12 +86,11 @@ for i in range(getRangeNumber()):
     try:
         updatePlFixtures()
         updateGameweekPlayers()
+        updatedPointshit()
         updateFixturesWithTablePoints()
-        updateLOTRWithTablePoints()
         produceTable()
         createTable()
-        produceLOTRTable()
-        createLOTRTable()
+        createFPLClassicoTable()
         logger.info('Data Collected, sleeping for 2 mins')
         time.sleep(120)
     except Exception as e:

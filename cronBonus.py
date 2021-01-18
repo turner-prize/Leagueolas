@@ -1,13 +1,14 @@
-from methods import updatePlFixtures, updateGameweekPlayers,updateFixturesWithTablePoints,produceTable,createTable
+from methods import updatePlFixtures, updateGameweekPlayers,updateFixturesWithTablePoints,produceTable,createTable,createFPLClassicoTable
 import time
 from loguru import logger
+from config import cronBonusLogPath
 import datetime
 import requests
 
 
 
 def setupLogger():
-        logger.add('/home/turner_prize/leagueolas/league-site/league-site/data/cronBonus.log', format="{time:YYYY-MM-DD @ HH:mm:ss} | {message}",backtrace=True)
+        logger.add(cronBonusLogPath, format="{time:YYYY-MM-DD @ HH:mm:ss} | {message}",backtrace=True)
 
 setupLogger()
 logger.info('Starting Bonus Script')
@@ -26,6 +27,7 @@ while not bonusAdded:
                     updateFixturesWithTablePoints()
                     produceTable()
                     createTable()
+                    createFPLClassicoTable()
                     break
                 else:
                     logger.info('nothing yet')

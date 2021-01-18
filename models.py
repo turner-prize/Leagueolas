@@ -7,9 +7,10 @@ import requests
 import datetime
 from dateutil import tz
 from collections import namedtuple
+from config import dbPath
 
 def CreateSession():
-        engine = create_engine(f"sqlite:////home/turner_prize/leagueolas/bot/league.db")#,echo=True)
+        engine = create_engine(f"sqlite:///{dbPath}")#,echo=True)
         Session = sessionmaker(bind=engine)
         Base.metadata.create_all(engine)
         return Session()
@@ -84,7 +85,7 @@ class Managers(Base):
     FH = Column(Integer)
     WC1 = Column(Integer)
     WC2  = Column(Integer)
-    KOTH = Column(Integer) 
+    KOTM = Column(Integer) 
     
 class Teams(Base):
     __tablename__ = 'teams'

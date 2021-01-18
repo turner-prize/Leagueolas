@@ -1,4 +1,4 @@
-from models import Gameweeks, CreateSession, Managers, Teams,Players,DraftedPlayers, Fixtures, PlFixtures, Table, LOTR, LOTRTable
+from models import Gameweeks, CreateSession, Managers, Teams,Players,DraftedPlayers, Fixtures, PlFixtures, Table
 from sqlalchemy import update, Integer, desc, or_
 from sqlalchemy.sql import func
 from sqlalchemy.orm import aliased,sessionmaker
@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import six
 import os
 import telegram
-from btoken import BotToken
+from config import BotToken, tablePath, classicoPath
 from itertools import combinations
-import operator                                
+import operator
 
 def sendMsg(msg):
     chats =     [   282457851,
@@ -35,7 +35,9 @@ def sendMsg(msg):
             print(i)
             pass
 
-
+def sendMsgAll(msg):
+    bot = telegram.Bot(token=BotToken)
+    bot.send_message(chat_id=-206206563, text=msg)
 
 def render_mpl_table(data,filename, col_width=3.0, row_height=0.625, font_size=14,
                      header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
@@ -73,7 +75,7 @@ def createTable():
     df['#'] = df.index +1
     df['#'] = df['#'].apply(lambda x: "{}{}".format(x, (' '*15) ))
     df = df[['#','Team', 'PlayerScore', 'Points']]
-    render_mpl_table(df,'/home/turner_prize/leagueolas/bot/table.png')
+    render_mpl_table(df,tablePath)
     
 def createFPLClassicoTable():
     session=CreateSession()
@@ -87,7 +89,7 @@ def createFPLClassicoTable():
     df['#'] = df.index +1
     df['#'] = df['#'].apply(lambda x: "{}{}".format(x, (' '*15) ))
     df = df[['#','Team', 'PlayerScore']]
-    render_mpl_table(df,'/home/turner_prize/leagueolas/bot/classictable.png')                                                                          
+    render_mpl_table(df,classicoPath)                                                                          
 
 def TripleCaptain(session,managerId,gw):
     TC = session.query(Managers).filter_by(id=managerId).filter_by(TC=gw).first()
@@ -144,6 +146,7 @@ def updateFixturesWithTablePoints():
         actualscore = points - ph
         f.score = actualscore
         
+       
         
         scoresOpponent = session.query(Teams).filter_by(managerId=f.opponentId).filter_by(gameweek=gw).filter_by(is_bench=0).all()
         scoreOpponentList = []
@@ -156,7 +159,7 @@ def updateFixturesWithTablePoints():
             else:
                 scoreOpponentList.append(i.points)
         pointsOpponent = sum(scoreOpponentList)
-        oph = session.query(Fixtures).filter_by(gameweek=gw).filter_by(managerId=f.managerId).first()
+        oph = session.query(Fixtures).filter_by(gameweek=gw).filter_by(managerId=f.opponentId).first()
         oph = oph.pointhit
         if oph is None:
             oph = 0
@@ -170,6 +173,7 @@ def updateFixturesWithTablePoints():
             f.points = 1
         else:
             f.points = 0
+            
         session.add(f)
         session.commit()
     session.close()
@@ -228,6 +232,7 @@ def updateLOTRWithTablePoints():
 def getNewPlFixtures():
     session=CreateSession()
     gw = GetGameweek(session)
+    session.query(PlFixtures).delete()
     r = requests.get(f"https://fantasy.premierleague.com/api/fixtures/?event={gw}")
     fixtureData = r.json()
     for i in fixtureData:
@@ -248,7 +253,7 @@ def updatePlFixtures():
     r = requests.get(f"https://fantasy.premierleague.com/api/fixtures/?event={gw}")
     fixtureData = r.json()
     for games in fixtureData:
-        j = session.query(PlFixtures).filter_by(away_team=games['team_a']).filter_by(gameweek=gw).first()
+        j = session.query(PlFixtures).filter_by(away_team=games['team_a']).filter_by(home_team=games['team_h']).filter_by(gameweek=gw).first()
         if games['started']:
             j.started = 1
         if games['finished_provisional']:
@@ -548,6 +553,27 @@ def updateDeadlines():
         session.commit()
         session.close()
 
+def updateKOTM():
+    session=CreateSession()
+    k = session.query(Managers).filter_by(KOTM=1).first()
+    gw = GetGameweek(session)
+    kotm = session.query(Fixtures).filter(Fixtures.gameweek==gw).filter(Fixtures.managerId==k.id).first()
+    challenger = session.query(Fixtures).filter(Fixtures.gameweek==gw).filter(Fixtures.managerId==kotm.opponentId).first()
+    
+    if challenger.score > kotm.score:
+        j = session.query(Managers).filter_by(id=kotm.opponentId).first()
+        sendMsg(f'{j.teamName} is the new King of The Mountain!')
+        j.KOTM = 1
+        k.KOTM = 0
+        session.add(j)
+        session.add(k)
+        session.commit()
+    else:
+        sendMsg(f'{k.teamName} retains King of The Mountain...for now.')
+        
+    session.close()
+    
+
 def updatedPointshit():
     session=CreateSession()
     m = session.query(Managers).all()
@@ -558,14 +584,10 @@ def updatedPointshit():
         team = r.json()
         hit = team['entry_history']['event_transfers_cost']
         x = session.query(Fixtures).filter(Fixtures.managerId==i.id).filter(Fixtures.gameweek==gw).first()
-        y = session.query(LOTR).filter(LOTR.manager1==i.id).filter(LOTR.gameweek==gw).first()
         x.pointhit = hit
-        y.pointhit = hit
         session.add(x)
-        session.add(y)
         session.commit()
 
     session.close()
     
-    
-GetNextFixtures()
+

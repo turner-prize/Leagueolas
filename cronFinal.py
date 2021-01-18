@@ -1,6 +1,7 @@
-from methods import updatePlFixtures, updateGameweekPlayers,updateFixturesWithTablePoints,produceTable,createTable,updateTeamsFinalBench,updateDeadlines,updateViceCaptain
+from methods import updatePlFixtures, updateGameweekPlayers,updateFixturesWithTablePoints,produceTable,createTable,updateTeamsFinalBench,updateDeadlines,updateViceCaptain,updateKOTM
 from loguru import logger
 from crontab import CronTab
+from config import cronFinalLogPath
 import time
 import requests
 
@@ -8,12 +9,12 @@ def clearCronjobs():
         cron = CronTab(user='turner_prize')
 
         for job in cron:
-                if job.comment in ['Gameweek Match','Bonus Points','Final Points']:
+                if job.comment in ['Gameweek Match','Bonus Points','Final Points','Cron weekly']:
                         cron.remove(job)
         cron.write()
 
 def setupLogger():
-        logger.add('/home/turner_prize/leagueolas/bot/cronFinal.log', format="{time} {level} {message}")
+        logger.add(cronFinalLogPath, format="{time} {level} {message}")
 
 if __name__ == "__main__":
         setupLogger()
@@ -32,6 +33,7 @@ if __name__ == "__main__":
                         updateDeadlines()
                         produceTable()
                         createTable()
+                        updateKOTM()
                         clearCronjobs()
                         break
                 else:
@@ -40,5 +42,4 @@ if __name__ == "__main__":
             except Exception as e:
                         logger.info('Error!')
                         logger.info(e)
-                        break
         logger.info('Final Update Completed')

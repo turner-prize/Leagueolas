@@ -1,5 +1,6 @@
 from models import CreateSession, Gameweeks, Fixtures, Teams, Managers,Players,PlFixtures,DraftedPlayers, PlTeams
 from sqlalchemy.sql import func
+from sqlalchemy import or_,desc
 from fuzzywuzzy import process
 
 def WhoHas(playerName):
@@ -218,6 +219,7 @@ def StillToPlay(session,gw,managedId):
                         .filter(or_(PlFixtures.away_team==Players.team,PlFixtures.home_team==Players.team)) \
                         .filter_by(managerId = managedId) \
                         .filter_by(gameweek = gw) \
+                        .filter(PlFixtures.gameweek == gw) \
                         .filter(PlFixtures.started == 0) \
                         .filter_by(is_bench=0) \
                         .all())
@@ -303,25 +305,46 @@ def getOneScore(TelegramId):
 
 def KOTM():
     session=CreateSession()
-    manager = session.query(Managers).filter_by(KOTH=1).first()
+    manager = session.query(Managers).filter_by(KOTM=1).first()
     session.close()
     return manager.name
 
-def JanCup():
+# def JanCup(): #qualifiction
+    # session=CreateSession()
+    # scores = session.query(func.sum(Fixtures.score),Managers.name) \
+                    # .filter(or_(Fixtures.gameweek==17,Fixtures.gameweek==18)) \
+                    # .filter(Fixtures.managerId==Managers.id)
+    # scores=scores.group_by(Managers.name)
+    # scores = scores.all()
+    # scores = sorted(scores, key=lambda tup: tup[0])
+    # scores.insert(4,"--------")
+    # scores2=''
+    # for i in scores:
+        # if not i == scores[0]:
+            # scores2 = f'{i[1]} - {i[0]} \n{scores2}'
+        # else:
+            # scores2 = f'{i[1]} - {i[0]}'
+    # session.close()
+    # return scores2
+
+def JanCup(): #Crig's version for post qualification
     session=CreateSession()
-    scores = session.query(func.sum(Fixtures.score),Managers.name) \
-                    .filter(or_(Fixtures.gameweek==21,Fixtures.gameweek==22)) \
-                    .filter(Fixtures.managerId==Managers.id)
+    scores = session.query(func.sum(Fixtures.score),Managers.name,Managers.id) \
+                    .filter(Fixtures.gameweek==19) \
+                    .filter(Fixtures.managerId==Managers.id) \
+                    .filter(or_(Managers.id == 2, Managers.id == 3, Managers.id == 4, Managers.id == 5, Managers.id == 6, Managers.id == 10, Managers.id == 11, Managers.id == 13, Managers.id == 14)) 
+                    #0shed, 1crigs, 2Matt, 3Elliot, 4Tom, 5Adam, 6Rholo, 7James, 8Snarf
     scores=scores.group_by(Managers.name)
+    scores=scores.order_by(Managers.id)
     scores = scores.all()
-    scores = sorted(scores, key=lambda tup: tup[0])
-    scores.insert(2,"--------")
+    #scores = sorted(scores, key=lambda tup: tup[0])
     scores2=''
-    for i in scores:
-        if not i == scores[0]:
-            scores2 = f'{i[1]} - {i[0]} \n{scores2}'
-        else:
-            scores2 = f'{i[1]} - {i[0]}'
+
+    scores2 = f'{scores[0][1]} : {scores[0][0]} - {scores[6][1]} : {scores[6][0]}\n\
+{scores[3][1]} : {scores[3][0]} - {scores[8][1]} : {scores[8][0]}\n\
+{scores[5][1]} : {scores[5][0]} - {scores[2][1]} : {scores[2][0]}\n\
+{scores[1][1]} : {scores[1][0]} - {scores[4][1]} : {scores[4][0]} - {scores[7][1]} : {scores[7][0]}{scores2}'
+    
     session.close()
     return scores2
 
@@ -331,24 +354,33 @@ def GetNextGameweek(session):
         gw = 38
     return gw[0]
 
+def getAllFixtures(session,gw):
+    f = session.query(Fixtures).filter_by(gameweek=gw).all()
+    return f
+
+def GetManagerTeamName(session, id):
+    return session.query(Managers.teamName).filter_by(id=id).first()
+
+
 def GetNextFixtures():
     session = CreateSession()
     gw = GetNextGameweek(session)
-    f = session.query(Fixtures).filter_by(gameweek=gw).all()
+    session.close()
+    session = CreateSession()
+    f = getAllFixtures(session,gw)
     n=0
     MyString = 'Next gameweeks fixtures:\n\n'
     for i in f:
-        n +=1
+        n =n+1
         if n % 2 == 0:
-            manager1 = session.query(Managers.teamName).filter_by(id=i.managerId).first()[0]
-            manager2 = session.query(Managers.teamName).filter_by(id=i.opponentId).first()[0]
-            
-            if session.query(Managers.KOTH).filter_by(id=i.managerId).first()[0] ==1:
+            manager1 = GetManagerTeamName(session, i.managerId)[0]
+            manager2 = GetManagerTeamName(session, i.opponentId)[0]
+
+            if session.query(Managers.KOTM).filter_by(id=i.managerId).first()[0] ==1:
                 manager1 = manager1 +'*'
                 
-            if session.query(Managers.KOTH).filter_by(id=i.opponentId).first()[0] ==1:
+            if session.query(Managers.KOTM).filter_by(id=i.opponentId).first()[0] ==1:
                 manager2 = manager2 +'*'
-            
             MyString = MyString + f"{manager1} v {manager2}\n"
     session.close()
     return MyString

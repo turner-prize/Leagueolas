@@ -7,6 +7,7 @@ import time
 from crontab import CronTab
 from collections import namedtuple
 from loguru import logger
+from config import cronFirstWeekLogPath,cronWeeklyCommand,cronCommand,cronBonusCommand,cronFinalCommand
 
 def getKickoffTimes():
     session=CreateSession()
@@ -61,7 +62,7 @@ def DateToCron():
 
 def CreateWeeklyCronjob():
 	cron = CronTab(user='turner_prize')
-	job  = cron.new(command='/home/turner_prize/leagueolas/bot-env/bin/python3 /home/turner_prize/leagueolas/bot/cronWeekly.py')
+	job  = cron.new(command=cronWeeklyCommand)
 	dt = DateToCron()
 	job.setall(dt)
 	cron.write()
@@ -69,7 +70,7 @@ def CreateWeeklyCronjob():
 def CreateMatchCronjobs():
 	cron = CronTab(user='turner_prize')
 	for i in getKickoffTimes():
-		job  = cron.new(command='/home/turner_prize/leagueolas/bot-env/bin/python3 /home/turner_prize/leagueolas/bot/cron.py',comment='Gameweek Match')
+		job  = cron.new(command=cronCommand,comment='Gameweek Match')
 		job.setall(i[0])
 		cron.write()
 
@@ -82,7 +83,7 @@ def CreateBonusCronjobs():
     for i in gameDays:
         KO = max([datetime.datetime.strptime(j[0],'%Y-%m-%dT%H:%M:%SZ') for j in q if datetime.datetime.strptime(j[0],'%Y-%m-%dT%H:%M:%SZ').date() == i])
         FT = KO + datetime.timedelta(hours=2)
-        job  = cron.new(command='/home/turner_prize/leagueolas/bot-env/bin/python3 /home/turner_prize/leagueolas/bot/cronBonus.py',comment='Bonus Points')
+        job  = cron.new(command=cronBonusCommand,comment='Bonus Points')
         job.setall(FT)
         cron.write()
     session.close()
@@ -94,13 +95,13 @@ def CreateFinalCronjobs():
     q = session.query(PlFixtures.kickoff_time).filter_by(gameweek=gw).all()
     KO = max([datetime.datetime.strptime(j[0],'%Y-%m-%dT%H:%M:%SZ') for j in q])
     FT = KO + datetime.timedelta(hours=2)
-    job  = cron.new(command='/home/turner_prize/leagueolas/bot-env/bin/python3 /home/turner_prize/leagueolas/bot/cronFinal.py',comment='Final Points')
+    job  = cron.new(command=cronFinalCommand,comment='Final Points')
     job.setall(FT)
     cron.write()
     session.close()
 
 def setupLogger():
-	logger.add('/home/turner_prize/leagueolas/bot/cronFirstWeek.log', format="{time} {level} {message}")
+	logger.add(cronFirstWeekLogPath, format="{time} {level} {message}")
 
 def InitialSetup():
     updatePlPlayers()

@@ -3,7 +3,7 @@
 from telegram.ext import Updater,CommandHandler, MessageHandler, BaseFilter, Filters
 import time
 import commands
-from btoken import BotToken
+from config import BotToken
 
 def MessageCheck(Message):
     MyList = ["Dan","Neil","Shed","Matt","Shane","Ads","Tom","Elliott","Crigs","Rholo","Sam"]
@@ -63,8 +63,8 @@ def WhoHas(bot, update, args):
 def JC(bot, update):
     bot.send_message(chat_id=update.message.chat_id,text=commands.JanCup())
 
-def echo(update, context):
-    print(context)
+#def echo(update, context): <--uncomment for debugging
+#    print(context)
 
 #---Handlers
 #------Commands
@@ -84,7 +84,7 @@ AF2L(CommandHandler('playersdetailed', PlayersDetailed))
 AF2L(CommandHandler('jancup', JC))
 AF2L(CommandHandler('draftlist', DraftList,pass_args=True))
 AF2L(CommandHandler('whohas', WhoHas,pass_args=True))
-AF2L(MessageHandler(Filters.text & (~Filters.command), echo))
+#AF2L(MessageHandler(Filters.text & (~Filters.command), echo))
 
 for f in Handlers:
     dispatcher.add_handler(f)
