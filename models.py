@@ -24,8 +24,8 @@ class Gameweeks(Base):
     deadline = Column(String(50))
     is_current = Column(String(50))
     is_next = Column(String(50))
-    gameweek_start = Column(String(50))
-    gameweek_end = Column(String(50))
+    janCupStart = Column(Integer)
+    lmsStart = Column(Integer)
 
 class Players(Base):
     __tablename__ = 'players'
@@ -127,3 +127,13 @@ class LOTRTable(Base):
     managerId =  Column(Integer,primary_key=True)
     score =  Column(Integer)
     points =  Column(Integer)
+
+class JanCupFixtures(Base):
+    __tablename__ = 'janCupFixtures'
+    id=Column(Integer,primary_key=True)
+    managerId =  Column(Integer)
+    opponentId =  Column(Integer)
+    isQuarterFinal =  Column(Integer)
+    isSemiFinal =  Column(Integer)
+    isFinal =  Column(Integer)
+    semiFinalDraw =  Column(Integer)
