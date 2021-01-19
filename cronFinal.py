@@ -1,4 +1,5 @@
 from methods import updatePlFixtures, updateGameweekPlayers,updateFixturesWithTablePoints,produceTable,createTable,updateTeamsFinalBench,updateDeadlines,updateViceCaptain,updateKOTM
+from jancup import updateJanCup
 from loguru import logger
 from crontab import CronTab
 from config import cronFinalLogPath
@@ -34,6 +35,7 @@ if __name__ == "__main__":
                         produceTable()
                         createTable()
                         updateKOTM()
+                        updateJanCup()
                         clearCronjobs()
                         break
                 else:
