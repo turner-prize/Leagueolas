@@ -10,7 +10,7 @@ import commands
 def JanCup():
     session = CreateSession()
     gw = GetJanCupWeek(session)
-
+    print(gw)
     if gw == 1 or gw == 2:
         x = JanCupQualification(session)
         session.close()
