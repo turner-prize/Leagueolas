@@ -10,16 +10,25 @@ import commands
 def JanCup():
     session = CreateSession()
     gw = GetJanCupWeek(session)
-    print(gw)
-    if gw == 1 or gw == 2:
-        x = JanCupQualification(session)
-        session.close()
-        return x
-    else:
-        x =  JanCupScores(session,gw)
-        session.close()
-        return x
+    if gw > 0 and gw <=5:
+        if gw == 1 or gw == 2:
+            x = JanCupQualification(session)
+            session.close()
+            return x
+        else:
+            x =  JanCupScores(session,gw)
+            session.close()
+            return x
     
+def updateJanCup():
+    session = CreateSession()
+    gw = GetJanCupWeek(session)
+    if gw == 3:
+        UpdateSemis()
+    elif gw == 4:
+        UpdateFinal
+    session.close()
+
 
 def UpdateFinal():
     session = CreateSession()
@@ -150,6 +159,3 @@ def GetJanCupWeek(session):
     gw = session.query(Gameweeks.id).filter_by(is_current=1).first()
     JCStartWeek = session.query(Gameweeks.id).filter_by(janCupStart=1).first()
     return (gw.id - JCStartWeek.id) +1
-
-
-UpdateSemis()
