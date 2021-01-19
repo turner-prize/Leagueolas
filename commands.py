@@ -311,7 +311,26 @@ def KOTM():
     return manager.name
 
 def JanCup():
-    return JC.JanCup()
+    session=CreateSession()
+    scores = session.query(func.sum(Fixtures.score),Managers.name,Managers.id) \
+                    .filter(Fixtures.gameweek==19) \
+                    .filter(Fixtures.managerId==Managers.id) \
+                    .filter(or_(Managers.id == 2, Managers.id == 3, Managers.id == 4, Managers.id == 5, Managers.id == 6, Managers.id == 10, Managers.id == 11, Managers.id == 13, Managers.id == 14)) 
+                    #0shed, 1crigs, 2Matt, 3Elliot, 4Tom, 5Adam, 6Rholo, 7James, 8Snarf
+    scores=scores.group_by(Managers.name)
+    scores=scores.order_by(Managers.id)
+    scores = scores.all()
+    #scores = sorted(scores, key=lambda tup: tup[0])
+    scores2=''
+
+    scores2 = f'{scores[0][1]} : {scores[0][0]} - {scores[6][1]} : {scores[6][0]}\n\
+{scores[3][1]} : {scores[3][0]} - {scores[8][1]} : {scores[8][0]}\n\
+{scores[5][1]} : {scores[5][0]} - {scores[2][1]} : {scores[2][0]}\n\
+{scores[1][1]} : {scores[1][0]} - {scores[4][1]} : {scores[4][0]} - {scores[7][1]} : {scores[7][0]}{scores2}'
+    
+    session.close()
+    return scores2
+    #return JC.JanCup()
 
 def GetNextGameweek(session):
     gw = session.query(Gameweeks.id).filter_by(is_next=1).first()
