@@ -3,6 +3,7 @@
 #2nd test comment
 
 from telegram.ext import Updater,CommandHandler, MessageHandler, BaseFilter, Filters
+from telegram import Bot
 import time
 import commands
 from config import BotToken
@@ -17,7 +18,7 @@ def MessageCheck(Message):
 updater = Updater(token=BotToken)
 j = updater.job_queue
 dispatcher = updater.dispatcher
-
+b = Bot(token=BotToken)
 
 #---Message Functions
 
@@ -90,5 +91,9 @@ AF2L(CommandHandler('whohas', WhoHas,pass_args=True))
 
 for f in Handlers:
     dispatcher.add_handler(f)
+    
+
+b.send_message(chat_id=282457851,text='Bot Restarted')
+   
 updater.start_polling()
 updater.idle()
