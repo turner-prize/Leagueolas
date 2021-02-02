@@ -172,7 +172,7 @@ def WeeklySetup():
 
 if __name__ == "__main__":
     setupLogger()
-    sendMsg("Deadline has passed!")
+    sendMsg("Deadline has passed! Congratulations to Elmo who has taken a decade to literally win anything!")
     logger.info('sleeping for 5 minutes to not fuck things up')
     time.sleep(300)
     while True:

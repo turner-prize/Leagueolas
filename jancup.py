@@ -115,6 +115,7 @@ def JanCupScores(session,jcgw):
     if jcgw == 4:
         fixtures = session.query(JanCupFixtures).filter_by(isSemiFinal=1).all()        
     if jcgw == 5:
+        print('here')
         fixtures = session.query(JanCupFixtures).filter_by(isFinal=1).all()        
     fx = []
     ScoreString = ''

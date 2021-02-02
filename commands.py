@@ -262,6 +262,7 @@ def getScoreString(session,id,gw):
     if manager.BB == gw:
         scores = session.query(Teams).filter_by(managerId=id).filter_by(gameweek=gw).all()
     else:
+        manager.BB = None
         scores = session.query(Teams).filter_by(managerId=id).filter_by(gameweek=gw).filter_by(is_bench=0).all()
     for i in scores:
         if i.is_captain==1:
