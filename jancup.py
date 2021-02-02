@@ -35,8 +35,8 @@ def UpdateFinal():
     fixtures = session.query(JanCupFixtures).filter_by(isSemiFinal=1).all()      
     ScoreString = ''
     for f in fixtures:
-        score1 = getScore(session,f.managerId)
-        score2 = getScore(session,f.opponentId)
+        score1 = getScore(f.managerId)
+        score2 = getScore(f.opponentId)
 
         if score1 > score2:
             x = f.managerId
@@ -63,13 +63,12 @@ def UpdateSemis():
     fixtures = session.query(JanCupFixtures).filter_by(isQuarterFinal=1).all()      
     ScoreString = ''
     for f in fixtures:
-        score1 = getScore(session,f.managerId)
-        score2 = getScore(session,f.opponentId)
-
+        score1 = getScore(f.managerId)
+        score2 = getScore(f.opponentId)
         if score1 > score2:
             x = f.managerId
         else:
-            x = f.managerId
+            x = f.opponentId
             
         insertSemiFixture(session,x,f.semiFinalDraw)
     session.close()
@@ -86,7 +85,8 @@ def insertSemiFixture(session,manager,drawNumber):
     session.commit()
     
 
-def getScore(session,id):
+def getScore(id):
+    session = CreateSession()
     gw = session.query(Gameweeks.id).filter_by(is_current=1).first()
     gw=gw.id
     scores = session.query(Teams).filter_by(managerId=id).filter_by(gameweek=gw).filter_by(is_bench=0).all()
@@ -101,6 +101,7 @@ def getScore(session,id):
     pointhit = session.query(Fixtures).filter_by(managerId=id).filter_by(gameweek=gw).first()
     if pointhit.pointhit:
         points = points - pointhit.pointhit
+    session.close()
     return points
 
 def TripleCaptain(session,managerId,gw):
